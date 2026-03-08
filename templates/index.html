@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student News Hub - Stay Informed</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -16,10 +17,6 @@
             --primary-dark: #1e40af;
             --primary-light: #3b82f6;
             --accent: #f59e0b;
-            --accent-light: #fbbf24;
-            --success: #10b981;
-            --danger: #ef4444;
-            --bg-dark: #0f172a;
             --bg-light: #f8fafc;
             --card-bg: #ffffff;
             --text-dark: #1e293b;
@@ -29,14 +26,26 @@
             --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
         }
 
+        body.dark-mode {
+            --bg-light: #1a1f36;
+            --card-bg: #252d44;
+            --text-dark: #e2e8f0;
+            --text-light: #a0aec0;
+            --border: #3f4d66;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             color: var(--text-dark);
             line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Header */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1f36 0%, #161b2e 100%);
+        }
+
         header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
@@ -90,17 +99,12 @@
             font-size: 0.95rem;
             background: rgba(255, 255, 255, 0.95);
             color: var(--text-dark);
-            transition: all 0.3s ease;
         }
 
         .search-input:focus {
             outline: none;
             background: white;
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
-        }
-
-        .search-input::placeholder {
-            color: var(--text-light);
         }
 
         .header-actions {
@@ -129,14 +133,12 @@
             transform: scale(1.1);
         }
 
-        /* Main Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        /* Filter Bar */
         .filters {
             display: flex;
             gap: 1rem;
@@ -145,25 +147,16 @@
             align-items: center;
         }
 
-        .filter-group {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
         .filter-label {
             font-weight: 600;
             color: var(--text-dark);
             font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .category-btn {
             padding: 0.6rem 1.25rem;
             border: 2px solid var(--border);
-            background: white;
+            background: var(--card-bg);
             color: var(--text-dark);
             border-radius: 50px;
             cursor: pointer;
@@ -183,34 +176,15 @@
             border-color: var(--primary);
         }
 
-        /* Status Messages */
         .status-message {
             padding: 1.5rem;
             border-radius: 0.75rem;
             margin-bottom: 2rem;
             display: none;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .status-message.show {
             display: block;
-        }
-
-        .status-message.loading {
-            background: #e0f2fe;
-            color: #0369a1;
-            border-left: 4px solid #0369a1;
         }
 
         .status-message.error {
@@ -225,7 +199,6 @@
             border-left: 4px solid #10b981;
         }
 
-        /* News Grid */
         .news-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -234,7 +207,7 @@
         }
 
         .news-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 1rem;
             overflow: hidden;
             box-shadow: var(--shadow);
@@ -260,11 +233,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .news-card:hover .card-image {
-            transform: scale(1.05);
         }
 
         .card-category {
@@ -277,8 +245,6 @@
             border-radius: 50px;
             font-size: 0.75rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .card-body {
@@ -291,8 +257,6 @@
         .card-source {
             font-size: 0.8rem;
             color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
         }
 
@@ -301,14 +265,12 @@
             font-weight: 700;
             color: var(--text-dark);
             margin-bottom: 0.75rem;
-            line-height: 1.4;
         }
 
         .card-description {
             font-size: 0.95rem;
             color: var(--text-light);
             margin-bottom: 1rem;
-            line-height: 1.5;
             flex: 1;
         }
 
@@ -350,24 +312,9 @@
         }
 
         .btn-action.favorite {
-            color: var(--danger);
+            color: #ef4444;
         }
 
-        .card-link {
-            display: inline-block;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .card-link:hover {
-            color: var(--primary-dark);
-            text-decoration: underline;
-        }
-
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -379,43 +326,14 @@
             margin-bottom: 1rem;
         }
 
-        .empty-state h3 {
-            font-size: 1.3rem;
-            color: var(--text-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        /* Footer */
         footer {
-            background: var(--bg-dark);
+            background: #0f172a;
             color: #cbd5e1;
             text-align: center;
             padding: 2rem;
             margin-top: 4rem;
         }
 
-        footer a {
-            color: var(--primary-light);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Loading Skeleton */
-        .skeleton {
-            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -425,12 +343,6 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.7);
             z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .modal.show {
@@ -440,7 +352,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--card-bg);
             border-radius: 1rem;
             max-width: 600px;
             max-height: 80vh;
@@ -467,11 +379,6 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-light);
-            transition: color 0.3s ease;
-        }
-
-        .btn-close:hover {
-            color: var(--text-dark);
         }
 
         .modal-body {
@@ -479,7 +386,51 @@
             line-height: 1.8;
         }
 
-        /* Responsive */
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -496,22 +447,11 @@
 
             .news-grid {
                 grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .filters {
-                margin-bottom: 1.5rem;
-            }
-
-            .filter-group {
-                width: 100%;
-                justify-content: flex-start;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="header-content">
             <a href="#" class="logo">
@@ -519,69 +459,40 @@
                 <span>Student News Hub</span>
             </a>
             <div class="search-container">
-                <input 
-                    type="text" 
-                    class="search-input" 
-                    id="searchInput" 
-                    placeholder="Search news stories..."
-                    autocomplete="off"
-                >
+                <input type="text" class="search-input" id="searchInput" placeholder="Search news stories..." autocomplete="off">
             </div>
             <div class="header-actions">
-                <button class="btn-icon" id="favoritesBtn" title="View favorites">
-                    ⭐
-                </button>
-                <button class="btn-icon" id="refreshBtn" title="Refresh news">
-                    🔄
-                </button>
+                <button class="btn-icon" id="alertBtn" title="Set email alerts">🔔</button>
+                <button class="btn-icon" id="favoritesBtn" title="View favorites">⭐</button>
+                <button class="btn-icon" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+                <button class="btn-icon" id="refreshBtn" title="Refresh news">🔄</button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
     <div class="container">
-        <!-- Status Message -->
         <div class="status-message" id="statusMessage"></div>
 
-        <!-- Filters -->
         <div class="filters">
             <span class="filter-label">Category:</span>
-            <div class="filter-group">
-                <button class="category-btn active" data-category="general">
-                    All News
-                </button>
-                <button class="category-btn" data-category="business">
-                    💼 Business
-                </button>
-                <button class="category-btn" data-category="technology">
-                    💻 Technology
-                </button>
-                <button class="category-btn" data-category="entertainment">
-                    🎬 Entertainment
-                </button>
-                <button class="category-btn" data-category="politics">
-                    🏛️ Politics
-                </button>
-                <button class="category-btn" data-category="science">
-                    🔬 Science
-                </button>
-                <button class="category-btn" data-category="sports">
-                    ⚽ Sports
-                </button>
-                <button class="category-btn" data-category="health">
-                    💊 Health
-                </button>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button class="category-btn active" data-category="general">All News</button>
+                <button class="category-btn" data-category="business">💼 Business</button>
+                <button class="category-btn" data-category="technology">💻 Technology</button>
+                <button class="category-btn" data-category="entertainment">🎬 Entertainment</button>
+                <button class="category-btn" data-category="politics">🏛️ Politics</button>
+                <button class="category-btn" data-category="science">🔬 Science</button>
+                <button class="category-btn" data-category="sports">⚽ Sports</button>
+                <button class="category-btn" data-category="health">💊 Health</button>
             </div>
         </div>
 
-        <!-- News Grid -->
         <div class="news-grid" id="newsGrid"></div>
     </div>
 
-    <!-- Footer -->
     <footer>
-        <p>📰 Student News Hub — Keep up with global news • <a href="https://newsapi.org/">Powered by NewsAPI</a></p>
-        <p style="font-size: 0.9rem; margin-top: 1rem;">For accounting and business students staying informed about markets, regulations, and global events</p>
+        <p>📰 Student News Hub — Keep up with global news • <a href="https://newsapi.org/" style="color: #3b82f6; text-decoration: none;">Powered by NewsAPI</a></p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">For accounting and business students staying informed</p>
     </footer>
 
     <!-- Article Modal -->
@@ -592,43 +503,83 @@
                 <button class="btn-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
+            <div class="modal-actions">
+                <button class="btn-primary" id="exportPdfBtn">📄 Export as PDF</button>
+                <button class="btn-secondary" id="closeModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Alert Modal -->
+    <div class="modal" id="alertModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔔 Email Alerts Setup</h2>
+                <button class="btn-close" id="closeAlertModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Get email alerts for breaking news in your favorite categories.</p>
+                <input type="email" class="email-input" id="emailInput" placeholder="Enter your email address">
+                <p style="font-size: 0.85rem; margin-bottom: 1rem;">Select categories for alerts:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+                    <label><input type="checkbox" class="alert-category" value="business"> Business</label>
+                    <label><input type="checkbox" class="alert-category" value="technology"> Technology</label>
+                    <label><input type="checkbox" class="alert-category" value="entertainment"> Entertainment</label>
+                    <label><input type="checkbox" class="alert-category" value="politics"> Politics</label>
+                    <label><input type="checkbox" class="alert-category" value="science"> Science</label>
+                    <label><input type="checkbox" class="alert-category" value="sports"> Sports</label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-primary" id="saveAlertBtn">Save Alert Settings</button>
+                <button class="btn-secondary" id="closeAlertModalBtn">Cancel</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // State Management
         const state = {
             currentCategory: 'general',
             articles: [],
             favorites: JSON.parse(localStorage.getItem('favorites')) || [],
+            darkMode: localStorage.getItem('darkMode') === 'true',
+            alertEmail: localStorage.getItem('alertEmail') || '',
+            alertCategories: JSON.parse(localStorage.getItem('alertCategories')) || [],
             isLoading: false,
-            searchQuery: ''
+            searchQuery: '',
+            currentArticle: null
         };
 
-        // DOM Elements
         const newsGrid = document.getElementById('newsGrid');
         const statusMessage = document.getElementById('statusMessage');
         const searchInput = document.getElementById('searchInput');
         const favoritesBtn = document.getElementById('favoritesBtn');
         const refreshBtn = document.getElementById('refreshBtn');
+        const darkModeBtn = document.getElementById('darkModeBtn');
+        const alertBtn = document.getElementById('alertBtn');
         const categoryBtns = document.querySelectorAll('.category-btn');
         const articleModal = document.getElementById('articleModal');
+        const alertModal = document.getElementById('alertModal');
         const closeModal = document.getElementById('closeModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const closeAlertModal = document.getElementById('closeAlertModal');
+        const closeAlertModalBtn = document.getElementById('closeAlertModalBtn');
         const modalBody = document.getElementById('modalBody');
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
+        const saveAlertBtn = document.getElementById('saveAlertBtn');
+        const emailInput = document.getElementById('emailInput');
+        const alertCategoryInputs = document.querySelectorAll('.alert-category');
 
-        // Show Status Message
+        if (state.darkMode) {
+            document.body.classList.add('dark-mode');
+        }
+
         function showStatus(message, type = 'info') {
             statusMessage.textContent = message;
             statusMessage.className = `status-message show ${type}`;
-            
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    statusMessage.classList.remove('show');
-                }, 3500);
-            }
+            setTimeout(() => statusMessage.classList.remove('show'), 3500);
         }
 
-        // Format Date
         function formatDate(dateString) {
             const date = new Date(dateString);
             const now = new Date();
@@ -645,10 +596,9 @@
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
 
-        // Fetch News
         async function fetchNews(category = 'general', searchQuery = '') {
             state.isLoading = true;
-            showStatus('Loading news...', 'loading');
+            showStatus('Loading news...', 'info');
 
             try {
                 let url = `/api/news`;
@@ -662,11 +612,6 @@
                 }
 
                 const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
                 const data = await response.json();
 
                 if (data.status === 'error') {
@@ -687,18 +632,9 @@
             }
         }
 
-        // Render News Grid
         function renderNews() {
             if (state.articles.length === 0) {
-                newsGrid.innerHTML = `
-                    <div style="grid-column: 1/-1;">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📭</div>
-                            <h3>No articles found</h3>
-                            <p>Try adjusting your filters or search terms</p>
-                        </div>
-                    </div>
-                `;
+                newsGrid.innerHTML = `<div style="grid-column: 1/-1;"><div class="empty-state"><div class="empty-state-icon">📭</div><h3>No articles found</h3><p>Try adjusting your filters or search terms</p></div></div>`;
                 return;
             }
 
@@ -706,13 +642,8 @@
                 const isFavorite = state.favorites.some(fav => fav.url === article.url);
                 
                 return `
-                    <div class="news-card" data-article-id="${article.id}">
-                        ${article.image ? `
-                            <div class="card-image-wrapper">
-                                <img src="${article.image}" alt="${article.title}" class="card-image" onerror="this.style.display='none'">
-                                <span class="card-category">${article.category || 'News'}</span>
-                            </div>
-                        ` : ''}
+                    <div class="news-card">
+                        ${article.image ? `<div class="card-image-wrapper"><img src="${article.image}" alt="${article.title}" class="card-image" onerror="this.style.display='none'"><span class="card-category">${article.category || 'News'}</span></div>` : ''}
                         <div class="card-body">
                             <div class="card-source">${article.source || 'Unknown Source'}</div>
                             <h3 class="card-title">${article.title}</h3>
@@ -720,13 +651,10 @@
                             <div class="card-footer">
                                 <span class="card-date">${formatDate(article.published_at)}</span>
                                 <div class="card-actions">
-                                    <button class="btn-action favorite ${isFavorite ? 'favorite' : ''}" 
-                                            data-url="${article.url}" 
-                                            title="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}">
+                                    <button class="btn-action favorite ${isFavorite ? 'favorite' : ''}" data-url="${article.url}" title="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}">
                                         ${isFavorite ? '⭐' : '☆'}
                                     </button>
-                                    <button class="btn-action" data-url="${article.url}" data-title="${article.title}" 
-                                            title="Read full article">
+                                    <button class="btn-action" data-url="${article.url}" data-title="${article.title}" title="Read full article">
                                         →
                                     </button>
                                 </div>
@@ -739,9 +667,7 @@
             attachEventListeners();
         }
 
-        // Attach Event Listeners
         function attachEventListeners() {
-            // Favorite buttons
             document.querySelectorAll('.btn-action.favorite').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -749,17 +675,16 @@
                 });
             });
 
-            // Read more buttons
             document.querySelectorAll('.btn-action:not(.favorite)').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const url = btn.dataset.url;
                     const title = btn.dataset.title;
-                    openArticle(url, title);
+                    const article = state.articles.find(a => a.url === url);
+                    openArticle(url, title, article);
                 });
             });
 
-            // Card clicks
             document.querySelectorAll('.news-card').forEach(card => {
                 card.addEventListener('click', () => {
                     const btn = card.querySelector('.btn-action:not(.favorite)');
@@ -768,7 +693,6 @@
             });
         }
 
-        // Toggle Favorite
         function toggleFavorite(btn) {
             const url = btn.dataset.url;
             const article = state.articles.find(a => a.url === url);
@@ -779,9 +703,7 @@
                 btn.classList.remove('favorite');
                 showStatus('Removed from favorites', 'success');
             } else {
-                if (article) {
-                    state.favorites.push(article);
-                }
+                if (article) state.favorites.push(article);
                 btn.textContent = '⭐';
                 btn.classList.add('favorite');
                 showStatus('Added to favorites', 'success');
@@ -790,14 +712,15 @@
             localStorage.setItem('favorites', JSON.stringify(state.favorites));
         }
 
-        // Open Article
-        function openArticle(url, title) {
+        function openArticle(url, title, article) {
+            state.currentArticle = article;
             modalBody.innerHTML = `
                 <h3 style="margin-bottom: 1rem; color: var(--text-dark);">${title}</h3>
-                <p><strong>Source:</strong> ${url}</p>
+                <p><strong>Source:</strong> ${article?.source || 'Unknown'}</p>
+                <p><strong>Published:</strong> ${formatDate(article?.published_at || '')}</p>
+                ${article?.description ? `<p style="margin-top: 1rem;">${article.description}</p>` : ''}
                 <p style="margin-top: 1.5rem;">
-                    <a href="${url}" target="_blank" rel="noopener noreferrer" 
-                       style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 600; text-decoration: none;">
                        Read full article →
                     </a>
                 </p>
@@ -805,7 +728,36 @@
             articleModal.classList.add('show');
         }
 
-        // Category Button Handlers
+        function exportToPdf() {
+            if (!state.currentArticle) return;
+            
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <h1>${state.currentArticle.title}</h1>
+                <p><strong>Source:</strong> ${state.currentArticle.source}</p>
+                <p><strong>Published:</strong> ${state.currentArticle.published_at}</p>
+                <p>${state.currentArticle.description}</p>
+            `;
+
+            const opt = {
+                margin: 10,
+                filename: `${state.currentArticle.title.substring(0, 30)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+            showStatus('PDF exported successfully!', 'success');
+        }
+
+        darkModeBtn.addEventListener('click', () => {
+            state.darkMode = !state.darkMode;
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', state.darkMode);
+            showStatus(`Dark mode ${state.darkMode ? 'enabled' : 'disabled'}`, 'success');
+        });
+
         categoryBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 categoryBtns.forEach(b => b.classList.remove('active'));
@@ -817,7 +769,6 @@
             });
         });
 
-        // Search Handler
         let searchTimeout;
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
@@ -825,9 +776,7 @@
             state.searchQuery = query;
 
             if (query.length < 2) {
-                if (query.length === 0) {
-                    categoryBtns[0].click();
-                }
+                if (query.length === 0) categoryBtns[0].click();
                 return;
             }
 
@@ -838,7 +787,6 @@
             }, 300);
         });
 
-        // Favorites Button
         favoritesBtn.addEventListener('click', () => {
             if (state.favorites.length === 0) {
                 showStatus('No favorites yet. Add some by clicking ☆!', 'info');
@@ -848,26 +796,53 @@
             state.articles = state.favorites;
             categoryBtns.forEach(b => b.classList.remove('active'));
             renderNews();
-            showStatus(`Showing ${state.favorites.length} favorite article(s)`, 'success');
+            showStatus(`Showing ${state.favorites.length} favorite(s)`, 'success');
         });
 
-        // Refresh Button
         refreshBtn.addEventListener('click', () => {
             fetchNews(state.currentCategory, state.searchQuery);
         });
 
-        // Modal Close
-        closeModal.addEventListener('click', () => {
-            articleModal.classList.remove('show');
+        alertBtn.addEventListener('click', () => {
+            emailInput.value = state.alertEmail;
+            alertCategoryInputs.forEach(input => {
+                input.checked = state.alertCategories.includes(input.value);
+            });
+            alertModal.classList.add('show');
         });
 
-        articleModal.addEventListener('click', (e) => {
-            if (e.target === articleModal) {
-                articleModal.classList.remove('show');
+        saveAlertBtn.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            if (!email || !email.includes('@')) {
+                showStatus('Please enter a valid email address', 'error');
+                return;
             }
+
+            state.alertEmail = email;
+            state.alertCategories = Array.from(alertCategoryInputs)
+                .filter(input => input.checked)
+                .map(input => input.value);
+
+            localStorage.setItem('alertEmail', email);
+            localStorage.setItem('alertCategories', JSON.stringify(state.alertCategories));
+
+            showStatus('Email alert settings saved!', 'success');
+            alertModal.classList.remove('show');
         });
 
-        // Initial Load
+        closeModal.addEventListener('click', () => articleModal.classList.remove('show'));
+        closeModalBtn.addEventListener('click', () => articleModal.classList.remove('show'));
+        closeAlertModal.addEventListener('click', () => alertModal.classList.remove('show'));
+        closeAlertModalBtn.addEventListener('click', () => alertModal.classList.remove('show'));
+        articleModal.addEventListener('click', (e) => {
+            if (e.target === articleModal) articleModal.classList.remove('show');
+        });
+        alertModal.addEventListener('click', (e) => {
+            if (e.target === alertModal) alertModal.classList.remove('show');
+        });
+
+        exportPdfBtn.addEventListener('click', exportToPdf);
+
         fetchNews('general', '');
     </script>
 </body>
