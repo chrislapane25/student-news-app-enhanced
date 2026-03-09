@@ -10,8 +10,9 @@ EVERYTHING_URL = "https://newsapi.org/v2/everything"
 CACHE_DURATION = timedelta(minutes=5)
 _cache = {"timestamp": None, "data": {}}
 
-# South African News RSS Feeds (Verified Working)
+# South African News RSS Feeds + Global Reputable Sources
 SA_RSS_FEEDS = {
+    # South African
     "Mail & Guardian": "https://mg.co.za/feed",
     "Daily Maverick": "https://www.dailymaverick.co.za/dmrss",
     "IOL News": "https://rss.iol.io/iol/news",
@@ -20,6 +21,13 @@ SA_RSS_FEEDS = {
     "MyBroadband": "https://mybroadband.co.za/news/feed",
     "Moneyweb": "https://www.moneyweb.co.za/feed/",
     "BusinessTech": "https://businesstech.co.za/news/feed/",
+    
+    # Global Reputable
+    "Al Jazeera": "https://www.aljazeera.com/xml/rss/all.xml",
+    "TechCrunch": "https://techcrunch.com/feed/",
+    "NPR": "https://feeds.npr.org/1001/rss.xml",
+    "The Guardian": "https://www.theguardian.com/international/rss",
+    "AP News": "https://apnews.com/apf-services/v2/home.rss",
 }
 
 def parse_rss_feed(feed_url, source_name):
