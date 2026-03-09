@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student News Hub - Stay Informed</title>
+    <title>Student Knowledge Hub - News & Research</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
@@ -139,6 +139,42 @@
             padding: 2rem;
         }
 
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .filters {
             display: flex;
             gap: 1rem;
@@ -199,14 +235,14 @@
             border-left: 4px solid #10b981;
         }
 
-        .news-grid {
+        .news-grid, .research-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 2rem;
             margin-bottom: 3rem;
         }
 
-        .news-card {
+        .news-card, .research-card {
             background: var(--card-bg);
             border-radius: 1rem;
             overflow: hidden;
@@ -217,7 +253,7 @@
             cursor: pointer;
         }
 
-        .news-card:hover {
+        .news-card:hover, .research-card:hover {
             transform: translateY(-8px);
             box-shadow: var(--shadow-lg);
         }
@@ -334,6 +370,11 @@
             margin-top: 4rem;
         }
 
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -445,8 +486,12 @@
                 padding: 1rem;
             }
 
-            .news-grid {
+            .news-grid, .research-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -455,17 +500,17 @@
     <header>
         <div class="header-content">
             <a href="#" class="logo">
-                <span class="logo-icon">📰</span>
-                <span>Student News Hub</span>
+                <span class="logo-icon">📚</span>
+                <span>Student Knowledge Hub</span>
             </a>
             <div class="search-container">
-                <input type="text" class="search-input" id="searchInput" placeholder="Search news stories..." autocomplete="off">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search news or research..." autocomplete="off">
             </div>
             <div class="header-actions">
                 <button class="btn-icon" id="alertBtn" title="Set email alerts">🔔</button>
                 <button class="btn-icon" id="favoritesBtn" title="View favorites">⭐</button>
                 <button class="btn-icon" id="darkModeBtn" title="Toggle dark mode">🌙</button>
-                <button class="btn-icon" id="refreshBtn" title="Refresh news">🔄</button>
+                <button class="btn-icon" id="refreshBtn" title="Refresh">🔄</button>
             </div>
         </div>
     </header>
@@ -473,26 +518,51 @@
     <div class="container">
         <div class="status-message" id="statusMessage"></div>
 
-        <div class="filters">
-            <span class="filter-label">Category:</span>
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                <button class="category-btn active" data-category="general">All News</button>
-                <button class="category-btn" data-category="business">💼 Business</button>
-                <button class="category-btn" data-category="technology">💻 Technology</button>
-                <button class="category-btn" data-category="entertainment">🎬 Entertainment</button>
-                <button class="category-btn" data-category="politics">🏛️ Politics</button>
-                <button class="category-btn" data-category="science">🔬 Science</button>
-                <button class="category-btn" data-category="sports">⚽ Sports</button>
-                <button class="category-btn" data-category="health">💊 Health</button>
-            </div>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="news">📰 News</button>
+            <button class="tab-btn" data-tab="research">🔬 Research</button>
         </div>
 
-        <div class="news-grid" id="newsGrid"></div>
+        <!-- NEWS TAB -->
+        <div id="news-tab" class="tab-content active">
+            <div class="filters">
+                <span class="filter-label">Category:</span>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <button class="category-btn active" data-category="general">All News</button>
+                    <button class="category-btn" data-category="business">💼 Business</button>
+                    <button class="category-btn" data-category="technology">💻 Technology</button>
+                    <button class="category-btn" data-category="entertainment">🎬 Entertainment</button>
+                    <button class="category-btn" data-category="politics">🏛️ Politics</button>
+                    <button class="category-btn" data-category="science">🔬 Science</button>
+                    <button class="category-btn" data-category="sports">⚽ Sports</button>
+                    <button class="category-btn" data-category="health">💊 Health</button>
+                </div>
+            </div>
+            <div class="news-grid" id="newsGrid"></div>
+        </div>
+
+        <!-- RESEARCH TAB -->
+        <div id="research-tab" class="tab-content">
+            <div class="filters">
+                <span class="filter-label">Field:</span>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <button class="category-btn active" data-field="general">All Research</button>
+                    <button class="category-btn" data-field="medicine">🏥 Medicine</button>
+                    <button class="category-btn" data-field="biology">🧬 Biology</button>
+                    <button class="category-btn" data-field="microbiology">🦠 Microbiology</button>
+                    <button class="category-btn" data-field="health">💊 Health</button>
+                    <button class="category-btn" data-field="physics">⚛️ Physics</button>
+                    <button class="category-btn" data-field="chemistry">🧪 Chemistry</button>
+                </div>
+            </div>
+            <div class="research-grid" id="researchGrid"></div>
+        </div>
     </div>
 
     <footer>
-        <p>📰 Student News Hub — Keep up with global news • <a href="https://newsapi.org/" style="color: #3b82f6; text-decoration: none;">Powered by NewsAPI</a></p>
-        <p style="font-size: 0.9rem; margin-top: 1rem;">For accounting and business students staying informed</p>
+        <p>📚 Student Knowledge Hub — News & Research • <a href="https://newsapi.org/">NewsAPI</a> & <a href="https://arxiv.org/">arXiv</a></p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">For students staying informed on global news and academic research</p>
     </footer>
 
     <!-- Article Modal -->
@@ -539,25 +609,29 @@
 
     <script>
         const state = {
+            currentTab: 'news',
             currentCategory: 'general',
+            currentField: 'general',
             articles: [],
+            papers: [],
             favorites: JSON.parse(localStorage.getItem('favorites')) || [],
             darkMode: localStorage.getItem('darkMode') === 'true',
             alertEmail: localStorage.getItem('alertEmail') || '',
             alertCategories: JSON.parse(localStorage.getItem('alertCategories')) || [],
             isLoading: false,
             searchQuery: '',
-            currentArticle: null
+            currentItem: null
         };
 
         const newsGrid = document.getElementById('newsGrid');
+        const researchGrid = document.getElementById('researchGrid');
         const statusMessage = document.getElementById('statusMessage');
         const searchInput = document.getElementById('searchInput');
         const favoritesBtn = document.getElementById('favoritesBtn');
         const refreshBtn = document.getElementById('refreshBtn');
         const darkModeBtn = document.getElementById('darkModeBtn');
         const alertBtn = document.getElementById('alertBtn');
-        const categoryBtns = document.querySelectorAll('.category-btn');
+        const tabBtns = document.querySelectorAll('.tab-btn');
         const articleModal = document.getElementById('articleModal');
         const alertModal = document.getElementById('alertModal');
         const closeModal = document.getElementById('closeModal');
@@ -577,7 +651,9 @@
         function showStatus(message, type = 'info') {
             statusMessage.textContent = message;
             statusMessage.className = `status-message show ${type}`;
-            setTimeout(() => statusMessage.classList.remove('show'), 3500);
+            if (type !== 'loading') {
+                setTimeout(() => statusMessage.classList.remove('show'), 3500);
+            }
         }
 
         function formatDate(dateString) {
@@ -592,17 +668,38 @@
             if (diffMins < 60) return `${diffMins}m ago`;
             if (diffHours < 24) return `${diffHours}h ago`;
             if (diffDays < 7) return `${diffDays}d ago`;
-            
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
 
+        // TAB SWITCHING
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                const tabName = btn.dataset.tab;
+                state.currentTab = tabName;
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+                
+                if (tabName === 'research') {
+                    fetchResearch(state.currentField, '');
+                } else {
+                    fetchNews(state.currentCategory, '');
+                }
+            });
+        });
+
+        // NEWS FUNCTIONS
         async function fetchNews(category = 'general', searchQuery = '') {
             state.isLoading = true;
-            showStatus('Loading news...', 'info');
+            showStatus('Loading news...', 'loading');
 
             try {
                 let url = `/api/news`;
-                
                 if (searchQuery) {
                     url = `/api/news/search?q=${encodeURIComponent(searchQuery)}&limit=30`;
                 } else if (category !== 'general') {
@@ -627,6 +724,45 @@
                 showStatus(`Failed to load news: ${error.message}`, 'error');
                 state.articles = [];
                 renderNews();
+            } finally {
+                state.isLoading = false;
+            }
+        }
+
+        // RESEARCH FUNCTIONS
+        async function fetchResearch(field = 'general', searchQuery = '') {
+            state.isLoading = true;
+            showStatus('Loading research papers...', 'loading');
+
+            try {
+                let url = `/api/research/search?q=`;
+                
+                if (searchQuery) {
+                    url += encodeURIComponent(searchQuery);
+                } else if (field !== 'general') {
+                    url += encodeURIComponent(field);
+                } else {
+                    url += encodeURIComponent('research');
+                }
+                
+                url += '&limit=15';
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === 'error') {
+                    showStatus(`Error: ${data.message}`, 'error');
+                    state.papers = [];
+                } else {
+                    state.papers = data.papers || [];
+                    showStatus(`Found ${data.count} research papers`, 'success');
+                }
+
+                renderResearch();
+            } catch (error) {
+                showStatus(`Failed to load research: ${error.message}`, 'error');
+                state.papers = [];
+                renderResearch();
             } finally {
                 state.isLoading = false;
             }
@@ -664,24 +800,59 @@
                 `;
             }).join('');
 
-            attachEventListeners();
+            attachNewsEventListeners();
         }
 
-        function attachEventListeners() {
-            document.querySelectorAll('.btn-action.favorite').forEach(btn => {
+        function renderResearch() {
+            if (state.papers.length === 0) {
+                researchGrid.innerHTML = `<div style="grid-column: 1/-1;"><div class="empty-state"><div class="empty-state-icon">📭</div><h3>No research papers found</h3><p>Try adjusting your filters or search terms</p></div></div>`;
+                return;
+            }
+
+            researchGrid.innerHTML = state.papers.map(paper => {
+                const isFavorite = state.favorites.some(fav => fav.url === paper.url);
+                return `
+                    <div class="research-card">
+                        <div class="card-image-wrapper" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+                            <span style="color: white; font-size: 3rem;">📄</span>
+                            <span class="card-category">${paper.paper_type === 'preprint' ? 'arXiv' : 'PubMed'}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-source">${paper.source || 'Unknown'}</div>
+                            <h3 class="card-title">${paper.title}</h3>
+                            <p class="card-description">${paper.description || 'No abstract available'}</p>
+                            <div class="card-footer">
+                                <span class="card-date">${formatDate(paper.published_at)}</span>
+                                <div class="card-actions">
+                                    <button class="btn-action favorite ${isFavorite ? 'favorite' : ''}" data-url="${paper.url}" title="${isFavorite ? 'Remove' : 'Add'}">
+                                        ${isFavorite ? '⭐' : '☆'}
+                                    </button>
+                                    <button class="btn-action" data-url="${paper.url}" data-title="${paper.title}" title="Read">
+                                        →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            attachResearchEventListeners();
+        }
+
+        function attachNewsEventListeners() {
+            document.querySelectorAll('.news-card .btn-action.favorite').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     toggleFavorite(btn);
                 });
             });
 
-            document.querySelectorAll('.btn-action:not(.favorite)').forEach(btn => {
+            document.querySelectorAll('.news-card .btn-action:not(.favorite)').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const url = btn.dataset.url;
-                    const title = btn.dataset.title;
-                    const article = state.articles.find(a => a.url === url);
-                    openArticle(url, title, article);
+                    const article = state.articles.find(a => a.url === btn.dataset.url);
+                    openArticle(btn.dataset.url, btn.dataset.title, article);
                 });
             });
 
@@ -693,9 +864,33 @@
             });
         }
 
+        function attachResearchEventListeners() {
+            document.querySelectorAll('.research-card .btn-action.favorite').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(btn);
+                });
+            });
+
+            document.querySelectorAll('.research-card .btn-action:not(.favorite)').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const paper = state.papers.find(p => p.url === btn.dataset.url);
+                    openArticle(btn.dataset.url, btn.dataset.title, paper);
+                });
+            });
+
+            document.querySelectorAll('.research-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const btn = card.querySelector('.btn-action:not(.favorite)');
+                    if (btn) btn.click();
+                });
+            });
+        }
+
         function toggleFavorite(btn) {
             const url = btn.dataset.url;
-            const article = state.articles.find(a => a.url === url);
+            const item = state.articles.find(a => a.url === url) || state.papers.find(p => p.url === url);
 
             if (state.favorites.some(fav => fav.url === url)) {
                 state.favorites = state.favorites.filter(fav => fav.url !== url);
@@ -703,7 +898,7 @@
                 btn.classList.remove('favorite');
                 showStatus('Removed from favorites', 'success');
             } else {
-                if (article) state.favorites.push(article);
+                if (item) state.favorites.push(item);
                 btn.textContent = '⭐';
                 btn.classList.add('favorite');
                 showStatus('Added to favorites', 'success');
@@ -712,16 +907,17 @@
             localStorage.setItem('favorites', JSON.stringify(state.favorites));
         }
 
-        function openArticle(url, title, article) {
-            state.currentArticle = article;
+        function openArticle(url, title, item) {
+            state.currentItem = item;
             modalBody.innerHTML = `
                 <h3 style="margin-bottom: 1rem; color: var(--text-dark);">${title}</h3>
-                <p><strong>Source:</strong> ${article?.source || 'Unknown'}</p>
-                <p><strong>Published:</strong> ${formatDate(article?.published_at || '')}</p>
-                ${article?.description ? `<p style="margin-top: 1rem;">${article.description}</p>` : ''}
+                <p><strong>Source:</strong> ${item?.source || 'Unknown'}</p>
+                <p><strong>Author:</strong> ${item?.author || 'Unknown'}</p>
+                <p><strong>Published:</strong> ${formatDate(item?.published_at || '')}</p>
+                ${item?.description ? `<p style="margin-top: 1rem;">${item.description}</p>` : ''}
                 <p style="margin-top: 1.5rem;">
                     <a href="${url}" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 600; text-decoration: none;">
-                       Read full article →
+                       Read full ${item?.paper_type ? 'paper' : 'article'} →
                     </a>
                 </p>
             `;
@@ -729,19 +925,19 @@
         }
 
         function exportToPdf() {
-            if (!state.currentArticle) return;
+            if (!state.currentItem) return;
             
             const element = document.createElement('div');
             element.innerHTML = `
-                <h1>${state.currentArticle.title}</h1>
-                <p><strong>Source:</strong> ${state.currentArticle.source}</p>
-                <p><strong>Published:</strong> ${state.currentArticle.published_at}</p>
-                <p>${state.currentArticle.description}</p>
+                <h1>${state.currentItem.title}</h1>
+                <p><strong>Source:</strong> ${state.currentItem.source}</p>
+                <p><strong>Published:</strong> ${state.currentItem.published_at}</p>
+                <p>${state.currentItem.description}</p>
             `;
 
             const opt = {
                 margin: 10,
-                filename: `${state.currentArticle.title.substring(0, 30)}.pdf`,
+                filename: `${state.currentItem.title.substring(0, 30)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
@@ -758,17 +954,29 @@
             showStatus(`Dark mode ${state.darkMode ? 'enabled' : 'disabled'}`, 'success');
         });
 
-        categoryBtns.forEach(btn => {
+        // NEWS CATEGORY BUTTONS
+        document.querySelectorAll('#news-tab .category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                categoryBtns.forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#news-tab .category-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 state.currentCategory = btn.dataset.category;
                 searchInput.value = '';
-                state.searchQuery = '';
                 fetchNews(state.currentCategory, '');
             });
         });
 
+        // RESEARCH FIELD BUTTONS
+        document.querySelectorAll('#research-tab .category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#research-tab .category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.currentField = btn.dataset.field;
+                searchInput.value = '';
+                fetchResearch(state.currentField, '');
+            });
+        });
+
+        // SEARCH
         let searchTimeout;
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
@@ -776,14 +984,22 @@
             state.searchQuery = query;
 
             if (query.length < 2) {
-                if (query.length === 0) categoryBtns[0].click();
+                if (query.length === 0) {
+                    if (state.currentTab === 'news') {
+                        fetchNews(state.currentCategory, '');
+                    } else {
+                        fetchResearch(state.currentField, '');
+                    }
+                }
                 return;
             }
 
-            categoryBtns.forEach(b => b.classList.remove('active'));
-            
             searchTimeout = setTimeout(() => {
-                fetchNews('general', query);
+                if (state.currentTab === 'news') {
+                    fetchNews('general', query);
+                } else {
+                    fetchResearch('general', query);
+                }
             }, 300);
         });
 
@@ -792,15 +1008,22 @@
                 showStatus('No favorites yet. Add some by clicking ☆!', 'info');
                 return;
             }
-
-            state.articles = state.favorites;
-            categoryBtns.forEach(b => b.classList.remove('active'));
-            renderNews();
+            if (state.currentTab === 'news') {
+                state.articles = state.favorites;
+                renderNews();
+            } else {
+                state.papers = state.favorites;
+                renderResearch();
+            }
             showStatus(`Showing ${state.favorites.length} favorite(s)`, 'success');
         });
 
         refreshBtn.addEventListener('click', () => {
-            fetchNews(state.currentCategory, state.searchQuery);
+            if (state.currentTab === 'news') {
+                fetchNews(state.currentCategory, state.searchQuery);
+            } else {
+                fetchResearch(state.currentField, state.searchQuery);
+            }
         });
 
         alertBtn.addEventListener('click', () => {

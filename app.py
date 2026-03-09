@@ -7,6 +7,7 @@ try:
 
     from flask import Flask, jsonify, render_template, request
     from services.news_service import get_news, search_news
+    from services.research_service import search_research, get_research_by_field
     from services.summary_service import summarize_article
     import os
     from datetime import datetime
@@ -144,22 +145,87 @@ try:
                 "message": str(e)
             }), 500
 
+    # ===== RESEARCH ENDPOINTS =====
+
+    @app.route("/api/research/search")
+    def api_search_research():
+        """Search for research papers"""
+        try:
+            query = request.args.get('q', '', type=str)
+            limit = request.args.get('limit', 15, type=int)
+            
+            if not query:
+                return jsonify({
+                    "status": "error",
+                    "message": "Please provide a search query (q parameter)"
+                }), 400
+            
+            papers = search_research(query=query, limit=limit)
+            
+            return jsonify({
+                "status": "success",
+                "query": query,
+                "count": len(papers),
+                "timestamp": datetime.now().isoformat(),
+                "papers": papers
+            })
+        except Exception as e:
+            print(f"ERROR in api_search_research: {str(e)}")
+            print(traceback.format_exc())
+            return jsonify({
+                "status": "error",
+                "message": str(e)
+            }), 500
+
+    @app.route("/api/research/field/<field>")
+    def api_research_by_field(field):
+        """Get research by field"""
+        try:
+            limit = request.args.get('limit', 15, type=int)
+            
+            valid_fields = ['medicine', 'biology', 'microbiology', 'health', 'physics', 'chemistry']
+            
+            if field.lower() not in valid_fields:
+                return jsonify({
+                    "status": "error",
+                    "message": f"Invalid field. Valid fields: {', '.join(valid_fields)}"
+                }), 400
+            
+            papers = get_research_by_field(field=field, limit=limit)
+            
+            return jsonify({
+                "status": "success",
+                "field": field,
+                "count": len(papers),
+                "timestamp": datetime.now().isoformat(),
+                "papers": papers
+            })
+        except Exception as e:
+            print(f"ERROR in api_research_by_field: {str(e)}")
+            print(traceback.format_exc())
+            return jsonify({
+                "status": "error",
+                "message": str(e)
+            }), 500
+
     @app.route("/api/config")
     def api_config():
         """Get app configuration"""
         return jsonify({
             "status": "success",
-            "app": "Student News App",
+            "app": "Student Knowledge Hub",
             "version": "2.0.0",
             "features": [
                 "Global news aggregation",
+                "Research paper search",
                 "Category filtering",
                 "Search functionality",
                 "Article summarization",
                 "Reputable sources only"
             ],
-            "categories": ['business', 'entertainment', 'general', 'health', 
+            "news_categories": ['business', 'entertainment', 'general', 'health', 
                           'science', 'sports', 'technology', 'politics'],
+            "research_fields": ['medicine', 'biology', 'microbiology', 'health', 'physics', 'chemistry'],
             "api_key_configured": bool(NEWS_API_KEY)
         })
 
@@ -168,7 +234,7 @@ try:
         """Health check endpoint"""
         return jsonify({
             "status": "healthy",
-            "service": "student-news-app",
+            "service": "student-knowledge-app",
             "timestamp": datetime.now().isoformat()
         })
 
@@ -188,7 +254,7 @@ try:
 
     if __name__ == "__main__":
         print("\n" + "="*60)
-        print("✅ Student News Hub - Starting Up")
+        print("✅ Student Knowledge Hub - Starting Up")
         print("="*60)
         print(f"✅ NEWS_API_KEY is set: {bool(NEWS_API_KEY)}")
         if NEWS_API_KEY:
