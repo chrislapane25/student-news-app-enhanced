@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 EVERYTHING_URL = "https://newsapi.org/v2/everything"
 
-CACHE_DURATION = timedelta(minutes=30)
+CACHE_DURATION = timedelta(minutes=5)  # Changed from 30 to 5 minutes
 _cache = {"timestamp": None, "data": {}}
 
 # South African News RSS Feeds (Verified Working)
@@ -157,34 +157,51 @@ def get_news(category=None, country="us", limit=10, language="en"):
     return articles[:limit]
 
 def search_news(query, limit=15, language="en"):
+    """Search for news - ALWAYS gets fresh results, no caching"""
     if not query or len(query.strip()) < 2:
         raise Exception("Search query must be at least 2 characters long")
     
     limit = min(limit, 100)
     articles = []
     
+    print(f"\n🔍 FRESH SEARCH for: {query}")
+    
+    # ALWAYS get fresh SA articles for search (no cache)
     try:
-        # Try SA search first
-        sa_articles = get_sa_news(limit=limit // 2)
+        all_sa_articles = []
         
-        # Filter SA articles by query
-        filtered_sa = [a for a in sa_articles 
-                      if query.lower() in a['title'].lower() 
-                      or query.lower() in a['description'].lower()]
+        for source_name, feed_url in SA_RSS_FEEDS.items():
+            try:
+                sa_articles = parse_rss_feed(feed_url, source_name)
+                all_sa_articles.extend(sa_articles)
+            except Exception as feed_error:
+                print(f"⚠️ Skipping {source_name}: {str(feed_error)[:50]}")
+                continue
+        
+        # Filter SA articles by query (case-insensitive)
+        query_lower = query.lower()
+        filtered_sa = []
+        
+        for a in all_sa_articles:
+            title = a.get('title', '').lower() if a.get('title') else ''
+            desc = a.get('description', '').lower() if a.get('description') else ''
+            
+            if query_lower in title or query_lower in desc:
+                filtered_sa.append(a)
         
         articles.extend(filtered_sa)
-        print(f"[SA Search] Found {len(filtered_sa)} SA results for: {query}")
+        print(f"[SA Search] Found {len(filtered_sa)} fresh SA results for: {query}")
     except Exception as e:
-        print(f"⚠️ SA search failed: {str(e)}")
+        print(f"⚠️ SA search error: {str(e)[:50]}")
     
+    # ALWAYS get fresh global search (no cache)
     try:
-        # Get global search results
         params = {
             "apiKey": NEWS_API_KEY,
             "q": query,
-            "pageSize": limit - len(articles),
+            "pageSize": limit * 2,  # Get more to filter
             "language": language,
-            "sortBy": "publishedAt"
+            "sortBy": "publishedAt"  # Most recent first
         }
         
         response = requests.get(EVERYTHING_URL, params=params, timeout=10)
@@ -210,9 +227,15 @@ def search_news(query, limit=15, language="en"):
                     "is_sa": False
                 })
         
-        print(f"[Global Search] Found {len(api_articles)} global results for: {query}")
+        print(f"[Global Search] Found {len(api_articles)} fresh global results for: {query}")
     
     except Exception as e:
-        print(f"⚠️ Global search failed: {str(e)}")
+        print(f"⚠️ Global search failed: {str(e)[:50]}")
     
+    # Sort by date (newest first)
+    articles = sorted(articles, 
+                     key=lambda x: x.get('published_at', '') or '', 
+                     reverse=True)
+    
+    print(f"✅ Total search results: {len(articles[:limit])}\n")
     return articles[:limit]
